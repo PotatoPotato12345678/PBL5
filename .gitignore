@@ -17,8 +17,8 @@ wheels/
 /IP102/dataset/val/**
 /IP102/ip102_v1.1/images/**
 /IP102/ip102_v1.1/augmented_images/**
-.ipynb_checkpoints
-*.cache
+**/.ipynb_checkpoints/**
+**/*.cache
 .DS_Store
 /PBL5/
 
