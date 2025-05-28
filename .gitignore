@@ -12,9 +12,15 @@ wheels/
 
 # custom
 /MNIST/
-/IP102/dataset/test/**
-/IP102/dataset/train/**
-/IP102/dataset/val/**
+/IP102/dataset/test/*
+!/IP102/dataset/test/.gitkeep
+
+/IP102/dataset/train/*
+!/IP102/dataset/train/.gitkeep
+
+/IP102/dataset/val/*
+!/IP102/dataset/val/.gitkeep
+
 /IP102/ip102_v1.1/images/**
 /IP102/ip102_v1.1/augmented_images/**
 **/.ipynb_checkpoints/**
