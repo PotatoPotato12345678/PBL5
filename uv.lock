@@ -1876,6 +1876,15 @@ wheels = [
 ]
 
 [[package]]
+name = "nbimporter"
+version = "0.3.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/37/fe36c6e8937bc36400126804fc4adb54b2ddc838e8f4bdbeafd6bb26205b/nbimporter-0.3.4.tar.gz", hash = "sha256:bc9bc803e7ba44ae9f7c6ec60cae2f4d1d509508feedd8c9e03a7949333bf16e", size = 4856, upload-time = "2021-03-08T10:40:40.029Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/fe/a85b96f9b362f206203be7aa7d811ada4abdfbba8892102c356d43ee90aa/nbimporter-0.3.4-py3-none-any.whl", hash = "sha256:14a4c37fd4a3e18ad5fba726d54f2e46b483dfe31c1f036682bb9ef259ab67a3", size = 4905, upload-time = "2021-03-08T10:40:38.84Z" },
+]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2302,6 +2311,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "jupyter" },
     { name = "keras" },
+    { name = "nbimporter" },
     { name = "numpy" },
     { name = "scikit-learn" },
     { name = "torch" },
@@ -2318,6 +2328,7 @@ dev = [
 requires-dist = [
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "keras", specifier = ">=3.10.0" },
+    { name = "nbimporter", specifier = ">=0.3.4" },
     { name = "numpy", specifier = "==1.26.4" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "torch", specifier = "==2.2.2" },
