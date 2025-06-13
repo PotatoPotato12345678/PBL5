@@ -30,5 +30,6 @@ wheels/
 **/.ipynb_checkpoints/**
 **/*.cache
 .DS_Store
+.uv.lock
 /PBL5/
 
