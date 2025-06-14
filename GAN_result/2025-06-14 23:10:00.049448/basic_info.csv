@@ -1,0 +1,2 @@
+batch_size,image_size,epoch,noise_dim,n_class
+128,64,500,100,2
