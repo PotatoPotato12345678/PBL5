@@ -20,7 +20,7 @@ GAN_PARAMS = {
     "TRAIN_SIZE": TRAIN_SIZE_PER_CLASS * 2,
     "BATCH_SIZE": 64,
     "IMG_SIZE": 128,
-    "EPOCH_COUNT": 300,
+    "EPOCH_COUNT": 100,
     "NOISE_DIM": 100,
     "N_CLASS": 2,
     "L_RATE_G": 0.0001,
@@ -106,9 +106,10 @@ def get_params():
         "down_sampling_size": TRAIN_SIZE_PER_CLASS, # per class
         "stratified_size": 1/10,
         "k_folds": 5,
-        "random_seed": 42,
+        "random_seed": None, # 42
         "val_split": 0.25, # 6-2-2
-        "epochs": 1,
-        "imgsz": 640,
-        "device": "cpu"
+        "epochs": 100,
+        "batch": 128,
+        "imgsz": 128,
+        "device": "0"
     }

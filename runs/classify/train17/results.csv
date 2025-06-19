@@ -1,0 +1,2 @@
+epoch,time,train/loss,metrics/accuracy_top1,metrics/accuracy_top5,val/loss,lr/pg0,lr/pg1,lr/pg2
+1,10.3034,1.22102,0.58438,1,1.05869,0.000409722,0.000409722,0.000409722

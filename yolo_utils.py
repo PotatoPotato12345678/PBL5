@@ -6,7 +6,10 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import constants
 
 
-def yolo_classify(fold_count):
+def yolo_classify(fold_count, params):
+    with open(f"{constants.YOLO_RESULT}/YOLO_BASIC_PARAMS.json", "w") as f:
+        json.dump(params, f, indent=4) 
+
     if constants.DA_METHOD == "NON_AI_BASED":
         with open(f"{constants.YOLO_RESULT}/NON_AI_BASED_paramter.json", "w") as f:
             json.dump(constants.AUGMENTATION_PARAMS, f, indent=4)
@@ -16,12 +19,15 @@ def yolo_classify(fold_count):
             json.dump(constants.GAN_PARAMS, f, indent=4)
 
     model = YOLO("yolov8n-cls.pt")
+
     train_results = model.train(
         data=os.path.join(os.getcwd(), "IP102/dataset"),
-        epochs=1,
-        imgsz=640,
-        device="cpu",
-        seed=42
+        # data=os.path.join(os.getcwd(), "data.yaml"),
+        epochs=params["epochs"],
+        imgsz=params["imgsz"],
+        device=params["device"],
+        batch=params["batch"],
+        seed=params["random_seed"]
     )
 
     with open(f"{constants.YOLO_RESULT}/yolov8_config.json", "w") as f:
