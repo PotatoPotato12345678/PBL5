@@ -1,2 +1,0 @@
-train_size,batch_size,image_size,epoch,noise_dim,n_class,learning_rate_g,learning_rate_d,learning_rate_c,beta_1,beta_2,fake_coefficient,weight_decay
-200,128,128,300,100,2,0.0001,0.0004,0.0004,0.5,0.999,0.2,<keras.src.regularizers.regularizers.L2 object at 0x15232dfa0>

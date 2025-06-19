@@ -3,8 +3,18 @@ import json
 import csv
 from ultralytics import YOLO
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+import constants
 
-def yolo_classify(fold_count, save_dir):
+
+def yolo_classify(fold_count):
+    if constants.DA_METHOD == "NON_AI_BASED":
+        with open(f"{constants.YOLO_RESULT}/NON_AI_BASED_paramter.json", "w") as f:
+            json.dump(constants.AUGMENTATION_PARAMS, f, indent=4)
+    
+    if constants.DA_METHOD == "GAN_BASED":
+        with open(f"{constants.YOLO_RESULT}/GAN_BASED_paramter.json", "w") as f:
+            json.dump(constants.AUGMENTATION_PARAMS, f, indent=4)
+
     model = YOLO("yolov8n-cls.pt")
     train_results = model.train(
         data=os.path.join(os.getcwd(), "IP102/dataset"),
@@ -12,6 +22,12 @@ def yolo_classify(fold_count, save_dir):
         imgsz=640,
         device="cpu"
     )
+
+    with open(f"{constants.YOLO_RESULT}/yolov8_config.json", "w") as f:
+        print(model.overrides)
+        print("-------------")
+        json.dump(model.overrides, f, indent=4)
+    
     metrics = model.val()
     test_dir = os.path.join(os.getcwd(), "IP102/dataset/test")
     y_true, y_pred = [], []
@@ -30,10 +46,8 @@ def yolo_classify(fold_count, save_dir):
     acc = accuracy_score(y_true, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='macro')
     fold_evaluation = {"accuracy": acc, "precison": precision, "recall": recall, "f1-score": f1}
-    with open(f"{save_dir}/evaluation_fold_{fold_count}.csv", 'w') as f:
+    with open(f"{constants.YOLO_RESULT}/evaluation_fold_{fold_count}.csv", 'w') as f:
         writer = csv.writer(f)
         writer.writerow(fold_evaluation.keys())
         writer.writerows([fold_evaluation.values()])
-    with open(f"{save_dir}/yolov8_config.json", "w") as f:
-        json.dump(model.overrides, f, indent=4)
     return {"true": y_true, "pred": y_pred}
