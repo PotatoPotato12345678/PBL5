@@ -13,7 +13,7 @@ def yolo_classify(fold_count):
     
     if constants.DA_METHOD == "GAN_BASED":
         with open(f"{constants.YOLO_RESULT}/GAN_BASED_paramter.json", "w") as f:
-            json.dump(constants.AUGMENTATION_PARAMS, f, indent=4)
+            json.dump(constants.GAN_PARAMS, f, indent=4)
 
     model = YOLO("yolov8n-cls.pt")
     train_results = model.train(
@@ -24,8 +24,6 @@ def yolo_classify(fold_count):
     )
 
     with open(f"{constants.YOLO_RESULT}/yolov8_config.json", "w") as f:
-        print(model.overrides)
-        print("-------------")
         json.dump(model.overrides, f, indent=4)
     
     metrics = model.val()

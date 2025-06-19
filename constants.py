@@ -2,20 +2,22 @@ YOLOV8_IMAGE_SIZE = 640
 YOLOV8_BATCH_SIZE = 16
 YOLOV8_EPOCHS = 50
 
-TRAIN_RATIO = 0.6
-VAL_RATIO = 0.2
-TEST_RATIO = 0.2
+# TRAIN_RATIO = 0.6
+# VAL_RATIO = 0.2
+# TEST_RATIO = 0.2 # 5-fold
 
-
+TRAIN_SIZE_PER_CLASS = 240
 
 ORIGINAL_DA_NUM_TO_LABEL = {
     23: "corn borer",
     52: "blister beetle"
 }
 
+N_CLASS = 4
+
 # Constant for CGAN
 GAN_PARAMS = {
-    "TRAIN_SIZE": 1500 * 2,
+    "TRAIN_SIZE": TRAIN_SIZE_PER_CLASS * 2,
     "BATCH_SIZE": 64,
     "IMG_SIZE": 128,
     "EPOCH_COUNT": 300,
@@ -99,9 +101,9 @@ def set_YOLO_Result(dir):
 def get_params():
     return {
         "move_back_flag": True,
-        "quick_demo_flag": False,
+        "quick_demo_flag": True,
         "method_selection": "down_sampling",
-        "down_sampling_size": 200, # per class
+        "down_sampling_size": TRAIN_SIZE_PER_CLASS, # per class
         "stratified_size": 1/10,
         "k_folds": 5,
         "random_seed": 42,

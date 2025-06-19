@@ -23,16 +23,20 @@ def prepare_data(params, paths):
             grouped = {}
             for name, num in zip(name_to_num[:, 0], name_to_num[:, 1]):
                 grouped.setdefault(num, []).append(name)
-            min_size = min(len(names) for names in grouped.values())
-            accept_min = int(np.floor(min_size / (3 * params["k_folds"])))
-            if params["down_sampling_size"] > accept_min:
-                params["down_sampling_size"] = accept_min
+
+            # min_size = min(len(names) for names in grouped.values())
+            # accept_min = int(np.floor(min_size / (3 * params["k_folds"])))
+            # if params["down_sampling_size"] > accept_min:
+            #     params["down_sampling_size"] = accept_min
+
             random.seed(params["random_seed"])
             reduced_dataset_name = []
             reduced_dataset_num = []
+
             for num, names in grouped.items():
-                reduced_dataset_name.extend(random.sample(names, params["down_sampling_size"] * 3 * params["k_folds"]))
-                reduced_dataset_num.extend([num] * params["down_sampling_size"] * 3 * params["k_folds"])
+                extend_size = int(params["down_sampling_size"] * (5/3))
+                reduced_dataset_name.extend(random.sample(names, extend_size))
+                reduced_dataset_num.extend([num] * extend_size)
             final_name_to_num = np.array(list(zip(reduced_dataset_name, reduced_dataset_num)))
         elif params["method_selection"] == 'stratified':
             _, name_reduced_data, _, num_reduced_data = train_test_split(
@@ -60,14 +64,15 @@ def split_fold_data(final_name_to_num, train_index, test_index, params):
     )
     return name_train, num_train, name_val, num_val, name_test, num_test
 
-def generate_augmented_data(name_train, num_train, paths):
+def generate_augmented_data(name_train, num_train, paths, fold_counter):
     name_train = np.array(name_train)
     num_train = np.array(num_train)
     orig_name_train, orig_num_train = [], []
     DA_name_train, DA_num_train = [], []
     for label in np.unique(num_train):
         idxs = np.where(num_train == label)[0]
-        if str(label) in constants.ORIGINAL_DA_NUM_TO_LABEL:
+
+        if int(label) in constants.ORIGINAL_DA_NUM_TO_LABEL.keys():
             n = len(idxs)
             n_replace = n // 2
             replace_idxs = idxs[:n_replace]
@@ -77,11 +82,12 @@ def generate_augmented_data(name_train, num_train, paths):
             aug_dir = os.path.join(paths["augmented_images_dir"], str(label))
             os.makedirs(aug_dir, exist_ok=True)
             for i, aug_img in enumerate(augmented_imgs):
-                aug_name = f"aug_{i}_{label}.jpg"
+                aug_name = f"aug_{fold_counter}_{i}_{label}.jpg"
                 aug_path = os.path.join(aug_dir, aug_name)
                 array_to_img(aug_img).save(aug_path)
                 DA_name_train.append(aug_name)
                 DA_num_train.append(label)
+            
             for idx in keep_idxs:
                 orig_name_train.append(name_train[idx])
                 orig_num_train.append(num_train[idx])
@@ -107,9 +113,15 @@ def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_t
         final_name_to_num, train_index, test_index, params
     )
 
-    orig_name_train, orig_num_train, DA_name_train, DA_num_train = generate_augmented_data(
-        name_train, num_train, paths
-    )
+    if constants.DA_METHOD != None:
+        orig_name_train, orig_num_train, DA_name_train, DA_num_train = generate_augmented_data(
+            name_train, num_train, paths, fold_counter
+        )
+    else:
+        orig_name_train = name_train
+        orig_num_train = num_train
+        DA_name_train = np.array([])
+        DA_num_train = np.array([])
 
     train_val_test_pack = pack_train_val_test(
         orig_name_train, orig_num_train, DA_name_train, DA_num_train, name_val, num_val, name_test, num_test
@@ -117,6 +129,7 @@ def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_t
 
     move_img(train_val_test_pack, num_to_label, paths)
     plot_class_dist(final_name_to_num, num_train, num_val, num_test, num_to_label, fold_counter)
+    
     y_true_pred_dic = yolo_classify(fold_counter)
     move_back_img(paths)
     return y_true_pred_dic
@@ -167,6 +180,7 @@ def main():
     constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[0])
     constants.set_DA_method("NON_AI_BASED")
     final_name_to_num, num_to_label = prepare_data(params, paths)
+
     all_y_true_pred = cross_validate(final_name_to_num, num_to_label, params, paths)
     evaluate_and_save(all_y_true_pred, num_to_label)
 
