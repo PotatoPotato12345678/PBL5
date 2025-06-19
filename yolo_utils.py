@@ -20,7 +20,7 @@ def yolo_classify(fold_count):
         data=os.path.join(os.getcwd(), "IP102/dataset"),
         epochs=1,
         imgsz=640,
-        device="cpu"
+        device="0"
     )
 
     with open(f"{constants.YOLO_RESULT}/yolov8_config.json", "w") as f:
