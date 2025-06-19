@@ -12,6 +12,7 @@ import constants
 from constants import get_paths, get_params
 from data_utils import move_back_img, create_num_to_label, create_name_to_num, move_img,plot_class_dist, plot_confusion_matrix
 from yolo_utils import yolo_classify
+import tensorflow as tf
 
 def prepare_data(params, paths):
     if params["move_back_flag"]:
@@ -78,10 +79,19 @@ def generate_augmented_data(name_train, num_train, paths, fold_counter):
             replace_idxs = idxs[:n_replace]
             keep_idxs = idxs[n_replace:]
             img_paths = [os.path.join(paths["images_dir"], name_train[idx]) for idx in replace_idxs]
-            augmented_imgs = traditional_DA(img_paths, constants.AUGMENTATION_PARAMS)
+            if constants.DA_METHOD == "NON_AI_BASED":
+                augmented_imgs = traditional_DA(img_paths, constants.AUGMENTATION_PARAMS)
+            elif constants.DA_METHOD == "GAN_BASED":
+                g_model = paths["CGAN_result_root"]
+                noise = tf.random.normal([n_replace, constants.GAN_PARAMS["NOISE_DIM"]])
+                labels = [int(label)]*n_replace
+                augmented_imgs =g_model([noise, labels], training=False).numpy()
+
             aug_dir = os.path.join(paths["augmented_images_dir"], str(label))
             os.makedirs(aug_dir, exist_ok=True)
             for i, aug_img in enumerate(augmented_imgs):
+                if constants.DA_METHOD == "GAN_BASED":
+                    aug_img = (aug_img * 127.5 + 127.5).astype(np.uint8)
                 aug_name = f"aug_{fold_counter}_{i}_{label}.jpg"
                 aug_path = os.path.join(aug_dir, aug_name)
                 array_to_img(aug_img).save(aug_path)
@@ -177,8 +187,8 @@ def evaluate_and_save(all_y_true_pred, num_to_label):
 def main():
     paths = get_paths()
     params = get_params()
-    constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[2])
-    constants.set_DA_method("NON_AI_BASED")
+    # constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[2])
+    constants.set_DA_method("GAN_BASED")
     final_name_to_num, num_to_label = prepare_data(params, paths)
 
     all_y_true_pred = cross_validate(final_name_to_num, num_to_label, params, paths)
