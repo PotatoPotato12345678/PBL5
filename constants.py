@@ -110,5 +110,5 @@ def get_params():
         "val_split": 0.25, # 6-2-2
         "epochs": 1,
         "imgsz": 640,
-        "device": "0"
+        "device": "cpu"
     }
