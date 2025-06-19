@@ -12,11 +12,6 @@ def assign_augment_img(name_to_num, ORIGINAL_DA_NUM_TO_LABEL, images_dir_path):
             DA_path_to_num.append([images_dir_path + name, num])
     return np.array(DA_path_to_num)
 
-def preprocess_images(images):
-        images = tf.cast(images, tf.float32)
-        images = (images / 127.5) - 1.0  # scale [0,255] → [-1,1]
-        return images
-
 def show_generated_examples(g_model, epoch):
     num_classes = constants.GAN_PARAMS["N_CLASS"]
     noise_dim = constants.GAN_PARAMS["NOISE_DIM"]

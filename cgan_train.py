@@ -21,7 +21,6 @@ def train_step(g_model, d_model, batch, noise_dim,
 
     # Suppose `all_images` is your dataset in memory:
     images, labels = batch
-    images = preprocess_images(images)
     batch_size = tf.shape(images)[0]
     noise = tf.random.normal([batch_size, noise_dim])
 
