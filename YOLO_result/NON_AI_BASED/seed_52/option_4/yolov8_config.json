@@ -14,7 +14,7 @@
     "device": "0",
     "workers": 8,
     "project": null,
-    "name": "train167",
+    "name": "train173",
     "exist_ok": false,
     "pretrained": true,
     "optimizer": "auto",

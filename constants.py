@@ -28,8 +28,6 @@ GAN_PARAMS = {
     "L_RATE_C": 0.0004,
     "B1": 0.5,
     "B2": 0.999,
-    "R": 0.2,
-    "WEIGHT_DECAY": 1e-4
 }
 
 AUGMENTATION_PARAMS = {
@@ -92,10 +90,15 @@ def get_paths():
     }
 
 YOLO_RESULT = None
+GAN_RESULT = None
 
 def set_YOLO_Result(dir):
     global YOLO_RESULT
     YOLO_RESULT = dir
+
+def set_GAN_Result(dir):
+    global GAN_RESULT
+    GAN_RESULT = dir
 
 
 def get_params():

@@ -131,7 +131,7 @@ def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_t
 
     move_img(train_val_test_pack, num_to_label, paths)
     plot_class_dist(final_name_to_num, num_train, num_val, num_test, num_to_label, fold_counter)
-    
+
     y_true_pred_dic = yolo_classify(fold_counter, params)
     move_back_img(paths)
     return y_true_pred_dic
@@ -178,21 +178,21 @@ def evaluate_and_save(all_y_true_pred, num_to_label):
     plot_confusion_matrix(all_y_true_pred["true"], all_y_true_pred["pred"], labels, f"{constants.YOLO_RESULT}/Confusion Matrix.png")
 
 def main():
-    paths = get_paths()
-    params = get_params()
     seed_list = [12,22,32,52,62,72,82,92,102] # 42
     number_of_NON_AI_DA_METHOD = len(constants.NON_AI_DA_PARAMS)
+    paths = get_paths()
+    params = get_params()
     for s in seed_list:
         params["random_seed"] = s
         for n in range(number_of_NON_AI_DA_METHOD):
             global OPTION_num
             OPTION_num = n
-            constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[OPTION_num])
-            constants.set_DA_method("NON_AI_BASED")
-            final_name_to_num, num_to_label = prepare_data(params, paths)
+    # constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[2])
+    # constants.set_DA_method("NON_AI_BASED")
+    # final_name_to_num, num_to_label = prepare_data(params, paths)
 
-            all_y_true_pred = cross_validate(final_name_to_num, num_to_label, params, paths)
-            evaluate_and_save(all_y_true_pred, num_to_label)
+    # all_y_true_pred = cross_validate(final_name_to_num, num_to_label, params, paths)
+    # evaluate_and_save(all_y_true_pred, num_to_label)
 
 if __name__ == "__main__":
     main()
