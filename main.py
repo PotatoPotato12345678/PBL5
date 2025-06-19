@@ -129,7 +129,7 @@ def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_t
 
     move_img(train_val_test_pack, num_to_label, paths)
     plot_class_dist(final_name_to_num, num_train, num_val, num_test, num_to_label, fold_counter)
-    
+
     y_true_pred_dic = yolo_classify(fold_counter)
     move_back_img(paths)
     return y_true_pred_dic
@@ -177,7 +177,7 @@ def evaluate_and_save(all_y_true_pred, num_to_label):
 def main():
     paths = get_paths()
     params = get_params()
-    constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[0])
+    constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[2])
     constants.set_DA_method("NON_AI_BASED")
     final_name_to_num, num_to_label = prepare_data(params, paths)
 
