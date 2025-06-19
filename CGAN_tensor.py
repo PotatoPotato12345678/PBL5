@@ -32,11 +32,10 @@ for path, label in zip(image_paths, labels):
     img_array = image.img_to_array(img)
     X_train.append(img_array)
     y_train.append(label)
-X_train = np.array(X_train).astype("float32") / 255.0
+X_train = (X_train.astype("float32") - 127.5) / 127.5
 le = LabelEncoder()
 y_train = le.fit_transform(y_train)
 y_train = np.array(y_train)
-X_train = (X_train - 127.5) / 127.5
 
 def data_generator():
     for x, y in zip(X_train, y_train):
