@@ -60,7 +60,7 @@ basic_info = {
     "noise_dim": constants.GAN_PARAMS["NOISE_DIM"], "n_class": constants.GAN_PARAMS["N_CLASS"], "learning_rate_g": constants.GAN_PARAMS["L_RATE_G"], "learning_rate_d": constants.GAN_PARAMS["L_RATE_D"],
     "learning_rate_c": constants.GAN_PARAMS["L_RATE_C"], "beta_1": constants.GAN_PARAMS["B1"], "beta_2": constants.GAN_PARAMS["B2"]
 }
-with open(f"{dic}/basic_info.csv", 'w') as f:
+with open(f"{constants.GAN_RESULT}/basic_info.csv", 'w') as f:
     writer = csv.writer(f)
     writer.writerow(basic_info.keys())
     writer.writerows([basic_info.values()])

@@ -190,6 +190,8 @@ def main():
     constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[2])
     constants.set_DA_method("NON_AI_BASED")
     final_name_to_num, num_to_label = prepare_data(params, paths)
+    import sys
+    sys.exit(1)
 
     all_y_true_pred = cross_validate(final_name_to_num, num_to_label, params, paths)
     evaluate_and_save(all_y_true_pred, num_to_label)

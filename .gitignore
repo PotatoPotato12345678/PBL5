@@ -35,3 +35,4 @@ wheels/
 
 
 /runs/** 
+/CGAN_result/** */

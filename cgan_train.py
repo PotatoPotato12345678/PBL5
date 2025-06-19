@@ -1,12 +1,12 @@
 import tensorflow as tf
 from tqdm import tqdm
 import constants
-from cgan_utils import show_generated_examples
+from cgan_utils import show_generated_examples, preprocess_images
 
 
 def discriminator_loss(real_output, fake_output):
     bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-    real_loss = bce(tf.ones_like(real_output), real_output)
+    real_loss = bce(tf.ones_like(real_output)*0.9, real_output)
     fake_loss = bce(tf.zeros_like(fake_output), fake_output)
     return real_loss + fake_loss
 
@@ -14,16 +14,21 @@ def generator_loss(fake_output):
     bce = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     return bce(tf.ones_like(fake_output), fake_output)
 
+
 @tf.function
 def train_step(g_model, d_model, batch, noise_dim, 
                g_optimizer, d_optimizer):
+
+    # Suppose `all_images` is your dataset in memory:
     images, labels = batch
+    images = preprocess_images(images)
     batch_size = tf.shape(images)[0]
     noise = tf.random.normal([batch_size, noise_dim])
 
     with tf.GradientTape(persistent=True) as tape:
         # Generate fake images
         generated_images = g_model([noise, labels], training=True)
+        generated_images = (generated_images + 1) / 2.0 
         # Discriminator outputs
         real_output= d_model([images, labels],training=True)
         fake_output = d_model([generated_images, labels], training=True)

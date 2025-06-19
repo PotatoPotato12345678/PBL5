@@ -8,7 +8,7 @@ def build_generator(noise_dim, num_classes):
     label_embedding = Embedding(num_classes, noise_dim)(label)
     label_embedding = Flatten()(label_embedding)
 
-    x = Multiply()([noise, label_embedding])
+    x = Concatenate()([noise, label_embedding])
     x = Dense(8 * 8 * 256, use_bias=False)(x)
     x = Reshape((8, 8, 256))(x)
 
