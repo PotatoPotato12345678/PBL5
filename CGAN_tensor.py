@@ -32,7 +32,9 @@ for path, label in zip(image_paths, labels):
     img_array = image.img_to_array(img)
     X_train.append(img_array)
     y_train.append(label)
-X_train = (X_train.astype("float32") - 127.5) / 127.5
+
+X_train = (np.array(X_train).astype("float32") - 127.5) / 127.5
+
 le = LabelEncoder()
 y_train = le.fit_transform(y_train)
 y_train = np.array(y_train)
@@ -78,5 +80,5 @@ train(
     g_optimizer=Adam(learning_rate=constants.GAN_PARAMS["L_RATE_G"], beta_1=constants.GAN_PARAMS["B1"], beta_2=constants.GAN_PARAMS["B2"]),
 )
 
-g_model.save(f"{dic}/generator.keras")
-d_model.save(f"{dic}/discriminator.keras")
+g_model.save(f"{constants.GAN_RESULT}/generator.keras")
+d_model.save(f"{constants.GAN_RESULT}/discriminator.keras")

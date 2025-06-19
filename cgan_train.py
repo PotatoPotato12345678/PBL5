@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tqdm import tqdm
 import constants
-from cgan_utils import show_generated_examples, preprocess_images
+from cgan_utils import show_generated_examples
 
 
 def discriminator_loss(real_output, fake_output):
