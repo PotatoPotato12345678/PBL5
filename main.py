@@ -6,6 +6,8 @@ import csv
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras.preprocessing.image import array_to_img
 from augmentation import traditional_DA
 import constants
@@ -71,20 +73,41 @@ def generate_augmented_data(name_train, num_train, paths, fold_counter):
     num_train = np.array(num_train)
     orig_name_train, orig_num_train = [], []
     DA_name_train, DA_num_train = [], []
+
+    key_list = list(constants.ORIGINAL_DA_NUM_TO_LABEL.keys())
+
     for label in np.unique(num_train):
         idxs = np.where(num_train == label)[0]
 
         if int(label) in constants.ORIGINAL_DA_NUM_TO_LABEL.keys():
+            key_i = key_list.index(int(label))
+            print("--------------------------")
+            print(key_i)
+            print("--------------------------")
+
             n = len(idxs)
             n_replace = n // 2
             replace_idxs = idxs[:n_replace]
             keep_idxs = idxs[n_replace:]
             img_paths = [os.path.join(paths["images_dir"], name_train[idx]) for idx in replace_idxs]
-            augmented_imgs = traditional_DA(img_paths, constants.AUGMENTATION_PARAMS)
+            if constants.DA_METHOD == "NON_AI_BASED":
+                augmented_imgs = traditional_DA(img_paths, constants.AUGMENTATION_PARAMS)
+            elif constants.DA_METHOD == "GAN_BASED":
+                g_model = keras.models.load_model(constants.GENERATOR_MODEL_PATH)
+                noise_dim = constants.GAN_PARAMS["NOISE_DIM"]
+
+                noise = tf.random.normal([n_replace, noise_dim])
+                labels = tf.constant(int(key_i), shape=(n_replace, 1), dtype=tf.int32)
+                labels = tf.reshape(labels, [-1])
+                
+                augmented_imgs = g_model([noise, labels], training=True)
+                augmented_imgs = (augmented_imgs + 1) / 2.0 
+
+
             aug_dir = os.path.join(paths["augmented_images_dir"], str(label))
             os.makedirs(aug_dir, exist_ok=True)
             for i, aug_img in enumerate(augmented_imgs):
-                aug_name = f"aug_{fold_counter}_{i}_{label}.jpg"
+                aug_name = f"aug_{constants.DA_METHOD}_{fold_counter}_{i}_{label}.jpg"
                 aug_path = os.path.join(aug_dir, aug_name)
                 array_to_img(aug_img).save(aug_path)
                 DA_name_train.append(aug_name)
@@ -142,7 +165,7 @@ def cross_validate(final_name_to_num, num_to_label, params, paths):
     all_y_true_pred = {"true": [], "pred": []}
     time = str(datetime.datetime.today())
     # constants.set_YOLO_Result(f"{paths['YOLO_result_root']}/{time}")
-    constants.set_YOLO_Result(f"{paths['YOLO_result_root']}/{constants.DA_METHOD}/seed_{params["random_seed"]}/option_{OPTION_num}")
+    constants.set_YOLO_Result(f"{paths['YOLO_result_root']}/{constants.DA_METHOD}/{time}")
 
     os.makedirs(constants.YOLO_RESULT, exist_ok=True)
     for fold_counter, (train_index, test_index) in enumerate(
@@ -178,20 +201,19 @@ def evaluate_and_save(all_y_true_pred, num_to_label):
     plot_confusion_matrix(all_y_true_pred["true"], all_y_true_pred["pred"], labels, f"{constants.YOLO_RESULT}/Confusion Matrix.png")
 
 def main():
-    # seed_list = [12,22,32,52,62,72,82,92,102] # 42
-    # number_of_NON_AI_DA_METHOD = len(constants.NON_AI_DA_PARAMS)
     paths = get_paths()
     params = get_params()
-    # for s in seed_list:
-    #     params["random_seed"] = s
-    #     for n in range(number_of_NON_AI_DA_METHOD):
-    #         global OPTION_num
-    #         OPTION_num = n
-    constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[2])
-    constants.set_DA_method("NON_AI_BASED")
+    params["random_seed"] = 42
+
+    DA_method = "GAN_BASED"
+
+    if DA_method == "GAN_BASED":
+        constants.set_DA_method("GAN_BASED")
+    elif DA_method == "NON_AI_BASED":
+        constants.set_DA_method("NON_AI_BASED")
+        constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[1])
+
     final_name_to_num, num_to_label = prepare_data(params, paths)
-    import sys
-    sys.exit(1)
 
     all_y_true_pred = cross_validate(final_name_to_num, num_to_label, params, paths)
     evaluate_and_save(all_y_true_pred, num_to_label)

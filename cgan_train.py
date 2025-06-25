@@ -19,19 +19,19 @@ def generator_loss(fake_output):
 def train_step(g_model, d_model, batch, noise_dim, 
                g_optimizer, d_optimizer):
 
-    # Suppose `all_images` is your dataset in memory:
     images, labels = batch
+
     batch_size = tf.shape(images)[0]
     noise = tf.random.normal([batch_size, noise_dim])
 
     with tf.GradientTape(persistent=True) as tape:
-        # Generate fake images
+        
         generated_images = g_model([noise, labels], training=True)
         generated_images = (generated_images + 1) / 2.0 
-        # Discriminator outputs
+        
         real_output= d_model([images, labels],training=True)
         fake_output = d_model([generated_images, labels], training=True)
-        # Losses
+        
         d_loss = discriminator_loss(real_output, fake_output)
         g_loss = generator_loss(fake_output)
 

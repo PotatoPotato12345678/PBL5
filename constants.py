@@ -1,3 +1,5 @@
+from tensorflow import keras
+
 YOLOV8_IMAGE_SIZE = 640
 YOLOV8_BATCH_SIZE = 16
 YOLOV8_EPOCHS = 50
@@ -91,6 +93,7 @@ def get_paths():
 
 YOLO_RESULT = None
 GAN_RESULT = None
+GENERATOR_MODEL_PATH = "CGAN_result/2025_06_20_00_33_44/generator.keras"
 
 def set_YOLO_Result(dir):
     global YOLO_RESULT
@@ -114,5 +117,5 @@ def get_params():
         "epochs": 100,
         "batch": 128,
         "imgsz": 128,
-        "device": "0"
+        "device": "cpu"
     }
