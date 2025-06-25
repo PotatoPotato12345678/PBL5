@@ -81,9 +81,6 @@ def generate_augmented_data(name_train, num_train, paths, fold_counter):
 
         if int(label) in constants.ORIGINAL_DA_NUM_TO_LABEL.keys():
             key_i = key_list.index(int(label))
-            print("--------------------------")
-            print(key_i)
-            print("--------------------------")
 
             n = len(idxs)
             n_replace = n // 2

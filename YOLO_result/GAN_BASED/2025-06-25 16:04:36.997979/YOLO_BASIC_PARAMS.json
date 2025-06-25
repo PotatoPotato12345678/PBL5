@@ -1,0 +1,14 @@
+{
+    "move_back_flag": true,
+    "quick_demo_flag": true,
+    "method_selection": "down_sampling",
+    "down_sampling_size": 240,
+    "stratified_size": 0.1,
+    "k_folds": 5,
+    "random_seed": 42,
+    "val_split": 0.25,
+    "epochs": 100,
+    "batch": 128,
+    "imgsz": 128,
+    "device": "cpu"
+}

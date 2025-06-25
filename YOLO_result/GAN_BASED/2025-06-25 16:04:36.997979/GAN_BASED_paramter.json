@@ -1,0 +1,13 @@
+{
+    "TRAIN_SIZE": 480,
+    "BATCH_SIZE": 64,
+    "IMG_SIZE": 128,
+    "EPOCH_COUNT": 100,
+    "NOISE_DIM": 100,
+    "N_CLASS": 2,
+    "L_RATE_G": 0.0004,
+    "L_RATE_D": 0.0001,
+    "L_RATE_C": 0.0004,
+    "B1": 0.5,
+    "B2": 0.999
+}
