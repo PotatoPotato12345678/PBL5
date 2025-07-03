@@ -1,18 +1,16 @@
 import os
+import sys
 import numpy as np
 import random
 import datetime
 import csv
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.preprocessing.image import array_to_img
-from augmentation import traditional_DA
+from constants import get_paths, get_params
+from augmentation import generate_augmented_data
 import constants
 from constants import get_paths, get_params
-from data_utils import move_back_img, create_num_to_label, create_name_to_num, move_img,plot_class_dist, plot_confusion_matrix
+from data_utils import move_back_img, create_num_to_label, create_name_to_num, move_img,plot_class_dist,pack_train_val_test, plot_confusion_matrix, remove_half_data
 from yolo_utils import yolo_classify
 
 OPTION_num = None
@@ -68,89 +66,40 @@ def split_fold_data(final_name_to_num, train_index, test_index, params):
     )
     return name_train, num_train, name_val, num_val, name_test, num_test
 
-def generate_augmented_data(name_train, num_train, paths, fold_counter):
-    name_train = np.array(name_train)
-    num_train = np.array(num_train)
-    orig_name_train, orig_num_train = [], []
-    DA_name_train, DA_num_train = [], []
-
-    key_list = list(constants.ORIGINAL_DA_NUM_TO_LABEL.keys())
-
-    for label in np.unique(num_train):
-        idxs = np.where(num_train == label)[0]
-
-        if int(label) in constants.ORIGINAL_DA_NUM_TO_LABEL.keys():
-            key_i = key_list.index(int(label))
-
-            n = len(idxs)
-            n_replace = n // 2
-            replace_idxs = idxs[:n_replace]
-            keep_idxs = idxs[n_replace:]
-            img_paths = [os.path.join(paths["images_dir"], name_train[idx]) for idx in replace_idxs]
-            if constants.DA_METHOD == "NON_AI_BASED":
-                augmented_imgs = traditional_DA(img_paths, constants.AUGMENTATION_PARAMS)
-            elif constants.DA_METHOD == "GAN_BASED":
-                g_model = keras.models.load_model(constants.GENERATOR_MODEL_PATH)
-                noise_dim = constants.GAN_PARAMS["NOISE_DIM"]
-
-                noise = tf.random.normal([n_replace, noise_dim])
-                labels = tf.constant(int(key_i), shape=(n_replace, 1), dtype=tf.int32)
-                labels = tf.reshape(labels, [-1])
-                
-                augmented_imgs = g_model([noise, labels], training=True)
-                augmented_imgs = (augmented_imgs + 1) / 2.0 
-
-
-            aug_dir = os.path.join(paths["augmented_images_dir"], str(label))
-            os.makedirs(aug_dir, exist_ok=True)
-            for i, aug_img in enumerate(augmented_imgs):
-                aug_name = f"aug_{constants.DA_METHOD}_{fold_counter}_{i}_{label}.jpg"
-                aug_path = os.path.join(aug_dir, aug_name)
-                array_to_img(aug_img).save(aug_path)
-                DA_name_train.append(aug_name)
-                DA_num_train.append(label)
-            
-            for idx in keep_idxs:
-                orig_name_train.append(name_train[idx])
-                orig_num_train.append(num_train[idx])
-        else:
-            for idx in idxs:
-                orig_name_train.append(name_train[idx])
-                orig_num_train.append(num_train[idx])
-    return (
-        np.array(orig_name_train), np.array(orig_num_train),
-        np.array(DA_name_train), np.array(DA_num_train)
-    )
-
-def pack_train_val_test(orig_name_train, orig_num_train, DA_name_train, DA_num_train, name_val, num_val, name_test, num_test):
-    return {
-        "train": {"name": orig_name_train, "num": orig_num_train},
-        "DA_train": {"name": DA_name_train, "num": DA_num_train},
-        "val": {"name": name_val, "num": num_val},
-        "test": {"name": name_test, "num": num_test}
-    }
-
 def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_to_label, params, paths):
     name_train, num_train, name_val, num_val, name_test, num_test = split_fold_data(
         final_name_to_num, train_index, test_index, params
     )
 
-    if constants.DA_METHOD != None:
+    if constants.DA_METHOD == "GAN_BASED" or constants.DA_METHOD == "NON_AI_BASED":
         orig_name_train, orig_num_train, DA_name_train, DA_num_train = generate_augmented_data(
             name_train, num_train, paths, fold_counter
         )
-    else:
+    elif constants.DA_METHOD == "NON_DA_FULL":
         orig_name_train = name_train
         orig_num_train = num_train
         DA_name_train = np.array([])
         DA_num_train = np.array([])
+    elif constants.DA_METHOD == "NON_DA_IMBALANCE":
+        orig_name_train, orig_num_train, DA_name_train, DA_num_train = remove_half_data(num_train, name_train)
+
+    elif constants.DA_METHOD == "NON_DA_FULL":
+        orig_name_train = name_train
+        orig_num_train = num_train
+        DA_name_train = np.array([])
+        DA_num_train = np.array([])
+    else:
+        print("DA method is not correct")
+        sys.exit(1)
+
 
     train_val_test_pack = pack_train_val_test(
         orig_name_train, orig_num_train, DA_name_train, DA_num_train, name_val, num_val, name_test, num_test
     )
 
     move_img(train_val_test_pack, num_to_label, paths)
-    plot_class_dist(final_name_to_num, num_train, num_val, num_test, num_to_label, fold_counter)
+
+    plot_class_dist(final_name_to_num, np.concatenate((orig_num_train, DA_num_train), axis=0), num_val, num_test, num_to_label, fold_counter)
 
     y_true_pred_dic = yolo_classify(fold_counter, params)
     move_back_img(paths)
@@ -200,15 +149,22 @@ def evaluate_and_save(all_y_true_pred, num_to_label):
 def main():
     paths = get_paths()
     params = get_params()
-    params["random_seed"] = 42
+    params["random_seed"] = 4
 
-    DA_method = "GAN_BASED"
+    DA_method = "NON_DA_FULL" # NON_DA_IMBALANCE, NON_DA_FULL, NON_AI_BASED, GAN_BASED
 
     if DA_method == "GAN_BASED":
         constants.set_DA_method("GAN_BASED")
     elif DA_method == "NON_AI_BASED":
         constants.set_DA_method("NON_AI_BASED")
         constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[1])
+    elif DA_method == "NON_DA_FULL":
+        constants.set_DA_method("NON_DA_FULL")
+    elif DA_method == "NON_DA_IMBALANCE":
+        constants.set_DA_method("NON_DA_IMBALANCE")    
+    else:
+        print("Please put the correct DA methods.")
+        sys.exit(1);
 
     final_name_to_num, num_to_label = prepare_data(params, paths)
 

@@ -69,6 +69,14 @@ def create_name_to_num(paths, num_to_label):
                     name_to_num.append(v)
     return np.array(name_to_num)
 
+def pack_train_val_test(orig_name_train, orig_num_train, DA_name_train, DA_num_train, name_val, num_val, name_test, num_test):
+    return {
+        "train": {"name": orig_name_train, "num": orig_num_train},
+        "DA_train": {"name": DA_name_train, "num": DA_num_train},
+        "val": {"name": name_val, "num": num_val},
+        "test": {"name": name_test, "num": num_test}
+    }
+
 def plot_class_dist(final_name_to_num, num_train, num_val, num_test, num_to_label, fold_count):
     num_list = {
         "Whole": final_name_to_num[:, 1],
@@ -107,3 +115,27 @@ def plot_confusion_matrix(y_true, y_pred, labels, save_path):
     plt.title('Confusion Matrix')
     plt.savefig(save_path)
     plt.close()
+
+def remove_half_data(num_train, name_train):
+    orig_name_train, orig_num_train = [], []
+    DA_name_train, DA_num_train = [], []
+
+    for label in np.unique(num_train):
+        idxs = np.where(num_train == label)[0]
+
+        if int(label) in constants.ORIGINAL_DA_NUM_TO_LABEL.keys():
+            n = len(idxs)
+            n_replace = n // 2
+            replace_idxs = idxs[:n_replace]
+            for idx in replace_idxs:
+                orig_name_train.append(name_train[idx])
+                orig_num_train.append(num_train[idx])
+        else:
+            for idx in idxs:
+                orig_name_train.append(name_train[idx])
+                orig_num_train.append(num_train[idx])
+
+    return (
+        np.array(orig_name_train), np.array(orig_num_train),
+        np.array(DA_name_train), np.array(DA_num_train)
+    )
