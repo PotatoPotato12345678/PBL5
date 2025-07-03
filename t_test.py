@@ -38,6 +38,8 @@ def plot_f1_score_dist(df):
 gan_based = "YOLO_result/GAN_BASED/2025-06-25 16:04:36.997979"
 non_ai_root = "YOLO_result/NON_AI_BASED/seed_42/"
 option_list = ["option_0", "option_1", "option_2", "option_3", "option_4", "option_5"]
+non_da_balance= "YOLO_result/NON_DA_BALANCE/2025-07-03 18:28:44.687156"
+non_da_imbalance = "YOLO_result/NON_DA_IMBALANCE/2025-07-03 18:20:32.650160"
 
 non_ai_path_dic = {path: os.path.join(non_ai_root, path) for path in option_list}
 
@@ -55,16 +57,30 @@ gan_row = {}
 for i in range(1, 6):
     file_path = os.path.join(gan_based, f"evaluation_fold_{i}.csv")
     gan_row[f"fold{i}"] = pd.read_csv(file_path)["f1-score"].values[0]
+
+non_da_balance_row = {}
+for i in range(1, 6):
+    file_path = os.path.join(non_da_balance, f"evaluation_fold_{i}.csv")
+    non_da_balance_row[f"fold{i}"] = pd.read_csv(file_path)["f1-score"].values[0]
+
+non_da_imbalance_row = {}
+for i in range(1, 6):
+    file_path = os.path.join(non_da_imbalance, f"evaluation_fold_{i}.csv")
+    non_da_imbalance_row[f"fold{i}"] = pd.read_csv(file_path)["f1-score"].values[0]
+
+
 f1_score_list.append(gan_row)
+f1_score_list.append(non_da_balance_row)
+f1_score_list.append(non_da_imbalance_row)
 
 
-df = pd.DataFrame(f1_score_list, index=option_list + ["GAN_BASED"])
+df = pd.DataFrame(f1_score_list, index=option_list + ["GAN_BASED", "NON_DA_BALANCE", "NON_DA_IMBALANCE"])
 print("f1 scores------------------------------------------------------------")
 print(df)
 print("---------------------------------------------------------------------\n\n")
 
 
-# plot_f1_score_dist(df)
+plot_f1_score_dist(df)
 
 models = df.index.tolist()
 n = len(models)

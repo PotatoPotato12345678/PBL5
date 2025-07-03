@@ -75,7 +75,7 @@ def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_t
         orig_name_train, orig_num_train, DA_name_train, DA_num_train = generate_augmented_data(
             name_train, num_train, paths, fold_counter
         )
-    elif constants.DA_METHOD == "NON_DA_FULL":
+    elif constants.DA_METHOD == "NON_DA_BALANCE":
         orig_name_train = name_train
         orig_num_train = num_train
         DA_name_train = np.array([])
@@ -83,7 +83,7 @@ def process_fold(fold_counter, final_name_to_num, train_index, test_index, num_t
     elif constants.DA_METHOD == "NON_DA_IMBALANCE":
         orig_name_train, orig_num_train, DA_name_train, DA_num_train = remove_half_data(num_train, name_train)
 
-    elif constants.DA_METHOD == "NON_DA_FULL":
+    elif constants.DA_METHOD == "NON_DA_BALANCE":
         orig_name_train = name_train
         orig_num_train = num_train
         DA_name_train = np.array([])
@@ -151,15 +151,15 @@ def main():
     params = get_params()
     params["random_seed"] = 4
 
-    DA_method = "NON_DA_FULL" # NON_DA_IMBALANCE, NON_DA_FULL, NON_AI_BASED, GAN_BASED
+    DA_method = "NON_DA_BALANCE" # NON_DA_IMBALANCE, NON_DA_BALANCE, NON_AI_BASED, GAN_BASED
 
     if DA_method == "GAN_BASED":
         constants.set_DA_method("GAN_BASED")
     elif DA_method == "NON_AI_BASED":
         constants.set_DA_method("NON_AI_BASED")
         constants.set_augmentation_params(constants.NON_AI_DA_PARAMS[1])
-    elif DA_method == "NON_DA_FULL":
-        constants.set_DA_method("NON_DA_FULL")
+    elif DA_method == "NON_DA_BALANCE":
+        constants.set_DA_method("NON_DA_BALANCE")
     elif DA_method == "NON_DA_IMBALANCE":
         constants.set_DA_method("NON_DA_IMBALANCE")    
     else:
