@@ -117,5 +117,5 @@ def get_params():
         "epochs": 100,
         "batch": 128,
         "imgsz": 128,
-        "device": "cpu"
+        "device": "0"
     }

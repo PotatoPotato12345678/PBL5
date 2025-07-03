@@ -164,7 +164,7 @@ def main():
         constants.set_DA_method("NON_DA_IMBALANCE")    
     else:
         print("Please put the correct DA methods.")
-        sys.exit(1);
+        sys.exit(1)
 
     final_name_to_num, num_to_label = prepare_data(params, paths)
 
