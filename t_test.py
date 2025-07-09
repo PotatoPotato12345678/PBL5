@@ -32,7 +32,7 @@ def plot_f1_score_dist(df):
 
     plt.tight_layout()
 
-    plt.savefig("t_test/f1-score_dist.png", dpi=300)
+    plt.savefig("result_img/f1-score_dist.png", dpi=300)
 
 
 gan_based = "YOLO_result/GAN_BASED/2025-06-25 16:04:36.997979"
